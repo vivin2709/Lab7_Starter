@@ -31,14 +31,14 @@ self.addEventListener('fetch', function (event) {
 
   event.respondWith(caches.open(CACHE_NAME).then((cache) => {
 
-    return cache.match(event.request).then(cachedResponse => {
-      if (cachedResponse) {
-        return cachedResponse;
+    return cache.match(event.request).then(responseinCache => {
+      if (responseinCache) {
+        return responseinCache;
       }
       else {
-        return fetch(event.request).then(fetchedResponse => {
-          cache.put(event.request, fetchedResponse.clone());
-          return fetchedResponse;
+        return fetch(event.request).then(addedResponse => {
+          cache.put(event.request, addedResponse.clone());
+          return addedResponse;
         });
       }
     });
