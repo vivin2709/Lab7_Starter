@@ -31,7 +31,7 @@ self.addEventListener('fetch', function (event) {
 
   event.respondWith(caches.open(CACHE_NAME).then((cache) => {
 
-    return cache.match(event.request).then(responseinCache => {
+    return caches.match(event.request).then(responseinCache => {
       if (responseinCache) {
         return responseinCache;
       }
