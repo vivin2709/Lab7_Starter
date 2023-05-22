@@ -45,33 +45,37 @@ function initializeServiceWorker() {
   // We first must register our ServiceWorker here before any of the code in
   // sw.js is executed.
   // B1. TODO - Check if 'serviceWorker' is supported in the current browser
-  if ('serviceWroler' in navigator) {
-    window.addEventListener('load', function () {
-      navigator.serviceWorker.register('./sw.js')
-        .then(function (registration) {
-          console.log('Service Worker registered successfully');
 
-        })
-        .catch(function (error) {
-          console.log('ServiceWorker registration failed');
+  window.addEventListener('load', async function () {
+    if ('serviceWorker' in navigator) {
+      try {
+        const registration = await navigator.serviceWorker.register("/sw.js", {
+          scope: "/",
         });
-
-    });
-  }
-  else {
-    console.log('serviceWorker not supported in this browser')
-  }
-
-  // B2. TODO - Listen for the 'load' event on the window object.
-  // Steps B3-B6 will be *inside* the event listener's function created in B2
-  // B3. TODO - Register './sw.js' as a service worker (The MDN article
-  //            "Using Service Workers" will help you here)
-  // B4. TODO - Once the service worker has been successfully registered, console
-  //            log that it was successful.
-  // B5. TODO - In the event that the service worker registration fails, console
-  //            log that it has failed.
-  // STEPS B6 ONWARDS WILL BE IN /sw.js
+        if (registration.installing) {
+          console.log("Service worker installing");
+        } else if (registration.waiting) {
+          console.log("Service worker installed");
+        } else if (registration.active) {
+          console.log("Service worker active");
+        }
+      } catch (error) {
+        console.error(`Registration failed with ${error}`);
+      }
+    }
+  });
 }
+
+// B2. TODO - Listen for the 'load' event on the window object.
+// Steps B3-B6 will be *inside* the event listener's function created in B2
+// B3. TODO - Register './sw.js' as a service worker (The MDN article
+//            "Using Service Workers" will help you here)
+// B4. TODO - Once the service worker has been successfully registered, console
+//            log that it was successful.
+// B5. TODO - In the event that the service worker registration fails, console
+//            log that it has failed.
+// STEPS B6 ONWARDS WILL BE IN /sw.js
+
 
 /**
  * Reads 'recipes' from localStorage and returns an array of
@@ -81,6 +85,7 @@ function initializeServiceWorker() {
  * array is saved to localStorage, and then the array is returned.
  * @returns {Array<Object>} An array of recipes found in localStorage
  */
+
 async function getRecipes() {
   // EXPOSE - START (All expose numbers start with A)
   // A1. TODO - Check local storage to see if there are any recipes.
@@ -92,23 +97,23 @@ async function getRecipes() {
   }
 
   const recipes = [];
-  return new Promise(async (resolve, reject) => {
-    try {
-      for (const recipeUrl of RECIPE_URLS) {
-        try {
-          const response = await fetch(recipeUrl);
-          const recipe = await response.json();
-          recipes.push(recipe);
 
-        } catch (error) {
-          console.log('Error fetching recipe');
+  return new Promise(async (resolve, reject) => {
+
+    for (const recipeUrl of RECIPE_URLS) {
+      try {
+        const response = await fetch(recipeUrl);
+        const recipe = await response.json();
+        recipes.push(recipe);
+        if (recipes.length == RECIPE_URLS.length) {
+          saveRecipesToStorage(recipes)
+          resolve(recipes);
         }
       }
-      localStorage.setItem('recipes', JSON.stringify(recipes));
-      resolve(recipes)
-    }
-    catch (error) {
-      reject(error);
+      catch (error) {
+        console.error('Error while fetching recipe');
+        reject(error)
+      }
     }
   });
 }
@@ -154,6 +159,7 @@ async function getRecipes() {
  * saves that string to 'recipes' in localStorage
  * @param {Array<Object>} recipes An array of recipes
  */
+
 function saveRecipesToStorage(recipes) {
   localStorage.setItem('recipes', JSON.stringify(recipes));
 }
