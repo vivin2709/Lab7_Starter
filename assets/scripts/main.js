@@ -106,13 +106,13 @@ async function getRecipes() {
         const recipe = await response.json();
         recipes.push(recipe);
         if (recipes.length == RECIPE_URLS.length) {
-          saveRecipesToStorage(recipes)
+          saveRecipesToStorage(recipes);
           resolve(recipes);
         }
       }
       catch (error) {
         console.error('Error while fetching recipe');
-        reject(error)
+        reject(error);
       }
     }
   });
